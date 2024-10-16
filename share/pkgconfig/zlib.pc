@@ -1,0 +1,13 @@
+prefix=C:/Github/GISBasic3rdParty
+exec_prefix=C:/Github/GISBasic3rdParty
+libdir=C:/Github/GISBasic3rdParty/lib
+sharedlibdir=C:/Github/GISBasic3rdParty/lib
+includedir=C:/Github/GISBasic3rdParty/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.3.1
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}
