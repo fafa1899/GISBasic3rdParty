@@ -27,17 +27,18 @@ endmacro()
 
 # Setting these here so they're accessible after install.
 # Might be useful for some users to check which settings were used.
-set(HTTPLIB_IS_USING_OPENSSL FALSE)
+set(HTTPLIB_IS_USING_OPENSSL TRUE)
 set(HTTPLIB_IS_USING_ZLIB TRUE)
 set(HTTPLIB_IS_COMPILED OFF)
 set(HTTPLIB_IS_USING_BROTLI FALSE)
-set(HTTPLIB_VERSION 0.18.0)
+set(HTTPLIB_IS_USING_NON_BLOCKING_GETADDRINFO ON)
+set(HTTPLIB_VERSION 0.25.0)
 
 include(CMakeFindDependencyMacro)
 
 # We add find_dependency calls here to not make the end-user have to call them.
 find_dependency(Threads)
-if(FALSE)
+if(TRUE)
 	# OpenSSL COMPONENTS were added in Cmake v3.11
 	if(CMAKE_VERSION VERSION_LESS "3.11")
 		find_dependency(OpenSSL 3.0.0)
@@ -46,9 +47,11 @@ if(FALSE)
 		# Since we use both, we need to search for both.
 		find_dependency(OpenSSL 3.0.0 COMPONENTS Crypto SSL)
 	endif()
+	set(httplib_OpenSSL_FOUND ${OpenSSL_FOUND})
 endif()
 if(TRUE)
 	find_dependency(ZLIB)
+	set(httplib_ZLIB_FOUND ${ZLIB_FOUND})
 endif()
 
 if(FALSE)
@@ -57,6 +60,30 @@ if(FALSE)
 	list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 	set(BROTLI_USE_STATIC_LIBS )
 	find_dependency(Brotli COMPONENTS common encoder decoder)
+	set(httplib_Brotli_FOUND ${Brotli_FOUND})
+endif()
+
+if()
+	set(httplib_fd_zstd_quiet_arg)
+	if(${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
+		set(httplib_fd_zstd_quiet_arg QUIET)
+	endif()
+	set(httplib_fd_zstd_required_arg)
+	if(${CMAKE_FIND_PACKAGE_NAME}_FIND_REQUIRED)
+		set(httplib_fd_zstd_required_arg REQUIRED)
+	endif()
+	find_package(zstd QUIET)
+	if(NOT zstd_FOUND)
+		find_package(PkgConfig ${httplib_fd_zstd_quiet_arg} ${httplib_fd_zstd_required_arg})
+		if(PKG_CONFIG_FOUND)
+			pkg_check_modules(zstd ${httplib_fd_zstd_quiet_arg} ${httplib_fd_zstd_required_arg} IMPORTED_TARGET libzstd)
+
+			if(TARGET PkgConfig::zstd)
+				add_library(zstd::libzstd ALIAS PkgConfig::zstd)
+			endif()
+		endif()
+	endif()
+	set(httplib_zstd_FOUND ${zstd_FOUND})
 endif()
 
 # Mildly useful for end-users
@@ -65,11 +92,6 @@ set_and_check(HTTPLIB_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/include")
 # Lets the end-user find the header path with the header appended
 # This is helpful if you're using Cmake's pre-compiled header feature
 set_and_check(HTTPLIB_HEADER_PATH "${PACKAGE_PREFIX_DIR}/include/httplib.h")
-
-# Consider each library support as a "component"
-set(httplib_OpenSSL_FOUND FALSE)
-set(httplib_ZLIB_FOUND TRUE)
-set(httplib_Brotli_FOUND FALSE)
 
 check_required_components(httplib)
 
