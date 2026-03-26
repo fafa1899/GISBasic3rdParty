@@ -95,7 +95,7 @@
 #define HAVE_GETCWD 1
 
 /* Define if you have the iconv() function and it works. */
-/* #undef HAVE_ICONV */
+#define HAVE_ICONV 1
 
 /* Define to 1 if the system has the type `__uint128_t'. */
 /* #undef HAVE_UINT128_T */
@@ -180,6 +180,9 @@
 
 /* Define to 1 if you have the `sched_getaffinity' function. */
 /* #undef HAVE_SCHED_GETAFFINITY */
+
+/* Define to 1 if you have the `std::shared_mutex' function. */
+/* #undef HAVE_SHARED_MUTEX */
 
 /* Define to 1 if you have the `uselocale' function. */
 /* #undef HAVE_USELOCALE */

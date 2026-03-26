@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "OGRINFO" "1" "Apr 02, 2024" "" "GDAL"
+.TH "OGRINFO" "1" "Apr 01, 2025" "" "GDAL"
 .SH NAME
 ogrinfo \- Lists information about an OGR-supported data source.
 .SH SYNOPSIS
@@ -37,13 +37,14 @@ ogrinfo \- Lists information about an OGR-supported data source.
 .nf
 .ft C
 ogrinfo [\-\-help] [\-\-help\-general]
-        [\-if <driver_name>] [\-json] [\-ro] [\-q] [\-where <restricted_where>|@f<ilename>]
+        [\-if <driver_name>] [\-json] [\-ro] [\-q] [\-where <restricted_where>|@<filename>]
         [\-spat <xmin> <ymin> <xmax> <ymax>] [\-geomfield <field>] [\-fid <fid>]
         [\-sql <statement>|@<filename>] [\-dialect <sql_dialect>] [\-al] [\-rl]
-        [\-so|\-features] [\-fields={YES|NO}]]
+        [\-so|\-features] [\-limit <nb_features>] [\-fields={YES|NO}]]
         [\-geom={YES|NO|SUMMARY|WKT|ISO_WKT}] [\-oo <NAME>=<VALUE>]...
         [\-nomd] [\-listmdd] [\-mdd <domain>|all]...
-        [\-nocount] [\-noextent] [\-nogeomtype] [\-wkt_format WKT1|WKT2|<other_values>]
+        [\-nocount] [\-nogeomtype] [[\-noextent] | [\-extent3D]]
+        [\-wkt_format WKT1|WKT2|<other_values>]
         [\-fielddomain <name>]
         <datasource_name> [<layer> [<layer> ...]]
 .ft P
@@ -82,7 +83,7 @@ New in version 3.2.
 .TP
 .B \-json
 Display the output in json format, conforming to the
-\fI\%ogrinfo.schema.json\fP
+\fI\%ogrinfo_output.schema.json\fP
 schema.
 .sp
 New in version 3.7.
@@ -109,6 +110,7 @@ explicitly enabled with \fI\%\-features\fP\&.
 Enable random layer reading mode, i.e. iterate over features in the order
 they are found in the dataset, and not layer per layer. This can be
 significantly faster for some formats (for example OSM, GMLAS).
+\-rl cannot be used with \-sql.
 .sp
 New in version 2.2.
 
@@ -118,6 +120,8 @@ New in version 2.2.
 .B \-so
 Summary Only: suppress listing of individual features and show only
 summary information like projection, schema, feature count and extents.
+In JSON output, \-so is implicit and listing of features can be enabled
+with \fI\%\-features\fP\&.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -134,6 +138,14 @@ New in version 3.7.
 .UNINDENT
 .INDENT 0.0
 .TP
+.B \-limit <nb_features>
+New in version 3.9.
+
+.sp
+Limit the number of features per layer.
+.UNINDENT
+.INDENT 0.0
+.TP
 .B \-q
 Quiet verbose reporting of various information, including coordinate
 system, layer schema, extents, and feature count.
@@ -143,17 +155,30 @@ system, layer schema, extents, and feature count.
 .B \-where <restricted_where>
 An attribute query in a restricted form of the queries used in the SQL
 \fIWHERE\fP statement. Only features matching the attribute query will be
-reported. Starting with GDAL 2.1, the \fB\efilename\fP syntax can be used to
+reported. Starting with GDAL 2.1, the \fB@<filename>\fP syntax can be used to
 indicate that the content is in the pointed filename.
+.sp
+Example of \fB\-where\fP and quoting:
+.INDENT 7.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+\-where \(dq\e\(dqCorner Point Identifier\e\(dq LIKE \(aq%__00_00\(aq\(dq
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-sql <statement>
+.B \-sql <statement>|@<filename>
 Execute the indicated SQL statement and return the result. Starting with
-GDAL 2.1, the \fB@filename\fP syntax can be used to indicate that the content is
-in the pointed filename. Data can also be edited with SQL INSERT, UPDATE,
+GDAL 2.1, the \fB@<filename>\fP syntax can be used to indicate that the content is
+in the pointed filename (e.g \fB@my_select.txt\fP where my_select.txt is a file
+in the current directory). Data can also be edited with SQL INSERT, UPDATE,
 DELETE, DROP TABLE, ALTER TABLE etc. Editing capabilities depend on the selected
-\fBdialect\fP\&.
+dialect with \fI\%\-dialect\fP\&.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -237,6 +262,16 @@ Suppress feature count printing.
 .TP
 .B \-noextent
 Suppress spatial extent printing.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-extent3D
+New in version 3.9.
+
+.sp
+Request a 3D extent to be reported (the default is 2D only). Note that this
+operation might be slower than requesting the 2D extent, depending on format
+and driver capabilities.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -325,12 +360,12 @@ Example of reporting the names of the layers in a NTF file:
 .ft C
 ogrinfo wrk/SHETLAND_ISLANDS.NTF
 
-# INFO: Open of \(gawrk/SHETLAND_ISLANDS.NTF\(aq
-# using driver \(gaUK .NTF\(aq successful.
-# 1: BL2000_LINK (Line String)
-# 2: BL2000_POLY (None)
-# 3: BL2000_COLLECTIONS (None)
-# 4: FEATURE_CLASSES (None)
+INFO: Open of \(gawrk/SHETLAND_ISLANDS.NTF\(aq
+using driver \(gaUK .NTF\(aq successful.
+1: BL2000_LINK (Line String)
+2: BL2000_POLY (None)
+3: BL2000_COLLECTIONS (None)
+4: FEATURE_CLASSES (None)
 .ft P
 .fi
 .UNINDENT
@@ -347,29 +382,29 @@ ogrinfo \e
   natural_earth_vector.gpkg \e
   ne_10m_admin_0_antarctic_claim_limit_lines
 
-  # INFO: Open of \(ganatural_earth_vector.gpkg\(aq
-  #      using driver \(gaGPKG\(aq successful.
+  INFO: Open of \(ganatural_earth_vector.gpkg\(aq
+       using driver \(gaGPKG\(aq successful.
 
-  # Layer name: ne_10m_admin_0_antarctic_claim_limit_lines
-  # Geometry: Line String
-  # Feature Count: 23
-  # Extent: (\-150.000000, \-90.000000) \- (160.100000, \-60.000000)
-  # Layer SRS WKT:
-  # GEOGCS[\(dqWGS 84\(dq,
-  #     DATUM[\(dqWGS_1984\(dq,
-  #         SPHEROID[\(dqWGS 84\(dq,6378137,298.257223563,
-  #             AUTHORITY[\(dqEPSG\(dq,\(dq7030\(dq]],
-  #         AUTHORITY[\(dqEPSG\(dq,\(dq6326\(dq]],
-  #     PRIMEM[\(dqGreenwich\(dq,0,
-  #         AUTHORITY[\(dqEPSG\(dq,\(dq8901\(dq]],
-  #     UNIT[\(dqdegree\(dq,0.0174532925199433,
-  #         AUTHORITY[\(dqEPSG\(dq,\(dq9122\(dq]],
-  #     AUTHORITY[\(dqEPSG\(dq,\(dq4326\(dq]]
-  # FID Column = fid
-  # Geometry Column = geom
-  # type: String (15.0)
-  # scalerank: Integer (0.0)
-  # featurecla: String (50.0)
+  Layer name: ne_10m_admin_0_antarctic_claim_limit_lines
+  Geometry: Line String
+  Feature Count: 23
+  Extent: (\-150.000000, \-90.000000) \- (160.100000, \-60.000000)
+  Layer SRS WKT:
+  GEOGCS[\(dqWGS 84\(dq,
+      DATUM[\(dqWGS_1984\(dq,
+          SPHEROID[\(dqWGS 84\(dq,6378137,298.257223563,
+              AUTHORITY[\(dqEPSG\(dq,\(dq7030\(dq]],
+          AUTHORITY[\(dqEPSG\(dq,\(dq6326\(dq]],
+      PRIMEM[\(dqGreenwich\(dq,0,
+          AUTHORITY[\(dqEPSG\(dq,\(dq8901\(dq]],
+      UNIT[\(dqdegree\(dq,0.0174532925199433,
+          AUTHORITY[\(dqEPSG\(dq,\(dq9122\(dq]],
+      AUTHORITY[\(dqEPSG\(dq,\(dq4326\(dq]]
+  FID Column = fid
+  Geometry Column = geom
+  type: String (15.0)
+  scalerank: Integer (0.0)
+  featurecla: String (50.0)
 .ft P
 .fi
 .UNINDENT
@@ -418,7 +453,7 @@ ogrinfo \-json poly.shp
             4765610.5
           ],
           \(dqcoordinateSystem\(dq:{
-            \(dqwkt\(dq:\(dqPROJCRS[\e\(dqOSGB36 / British National Grid\e\(dq,BASEGEOGCRS[\e\(dqOSGB36\e\(dq,DATUM[\e\(dqOrdnance Survey of Great Britain 1936\e\(dq,ELLIPSOID[\e\(dqAiry 1830\e\(dq,6377563.396,299.3249646,LENGTHUNIT[\e\(dqmetre\e\(dq,1]]],PRIMEM[\e\(dqGreenwich\e\(dq,0,ANGLEUNIT[\e\(dqdegree\e\(dq,0.0174532925199433]],ID[\e\(dqEPSG\e\(dq,4277]],CONVERSION[\e\(dqBritish National Grid\e\(dq,METHOD[\e\(dqTransverse Mercator\e\(dq,ID[\e\(dqEPSG\e\(dq,9807]],PARAMETER[\e\(dqLatitude of natural origin\e\(dq,49,ANGLEUNIT[\e\(dqdegree\e\(dq,0.0174532925199433],ID[\e\(dqEPSG\e\(dq,8801]],PARAMETER[\e\(dqLongitude of natural origin\e\(dq,\-2,ANGLEUNIT[\e\(dqdegree\e\(dq,0.0174532925199433],ID[\e\(dqEPSG\e\(dq,8802]],PARAMETER[\e\(dqScale factor at natural origin\e\(dq,0.9996012717,SCALEUNIT[\e\(dqunity\e\(dq,1],ID[\e\(dqEPSG\e\(dq,8805]],PARAMETER[\e\(dqFalse easting\e\(dq,400000,LENGTHUNIT[\e\(dqmetre\e\(dq,1],ID[\e\(dqEPSG\e\(dq,8806]],PARAMETER[\e\(dqFalse northing\e\(dq,\-100000,LENGTHUNIT[\e\(dqmetre\e\(dq,1],ID[\e\(dqEPSG\e\(dq,8807]]],CS[Cartesian,2],AXIS[\e\(dq(E)\e\(dq,east,ORDER[1],LENGTHUNIT[\e\(dqmetre\e\(dq,1]],AXIS[\e\(dq(N)\e\(dq,north,ORDER[2],LENGTHUNIT[\e\(dqmetre\e\(dq,1]],USAGE[SCOPE[\e\(dqEngineering survey, topographic mapping.\e\(dq],AREA[\e\(dqUnited Kingdom (UK) \- offshore to boundary of UKCS within 49°45\(aqN to 61°N and 9°W to 2°E; onshore Great Britain (England, Wales and Scotland). Isle of Man onshore.\e\(dq],BBOX[49.75,\-9,61.01,2.01]],ID[\e\(dqEPSG\e\(dq,27700]]\(dq,
+            \(dqwkt\(dq:\(dqPROJCRS[\e\(dqOSGB36 / British National Grid\e\(dq,BASEGEOGCRS[\e\(dqOSGB36\e\(dq,DATUM...\(dq,
             \(dqprojjson\(dq:{
               \(dq$schema\(dq:\(dqhttps://proj.org/schemas/v0.6/projjson.schema.json\(dq,
               \(dqtype\(dq:\(dqProjectedCRS\(dq,
@@ -531,7 +566,7 @@ ogrinfo \-json poly.shp
                 ]
               },
               \(dqscope\(dq:\(dqEngineering survey, topographic mapping.\(dq,
-              \(dqarea\(dq:\(dqUnited Kingdom (UK) \- offshore to boundary of UKCS within 49°45\(aqN to 61°N and 9°W to 2°E; onshore Great Britain (England, Wales and Scotland). Isle of Man onshore.\(dq,
+              \(dqarea\(dq:\(dqUnited Kingdom (UK) \- offshore to boundary of UKCS within 49°45...\(dq,
               \(dqbbox\(dq:{
                 \(dqsouth_latitude\(dq:49.75,
                 \(dqwest_longitude\(dq:\-9,
@@ -589,68 +624,25 @@ ogrinfo \-json poly.shp
 .UNINDENT
 .UNINDENT
 .sp
-Example of using an attribute query to restrict the output of the features
-in a layer:
+Example of using \-q and an attribute query, to restrict the output to
+certain features in a layer:
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-ogrinfo \-ro \e
-    \-where \(aqGLOBAL_LINK_ID=185878\(aq \e
-    wrk/SHETLAND_ISLANDS.NTF BL2000_LINK
+ogrinfo \-q \-ro \e
+  \-where \(aqGLOBAL_LINK_ID=185878\(aq \e
+  wrk/SHETLAND_ISLANDS.NTF BL2000_LINK
 
-# INFO: Open of \(gawrk/SHETLAND_ISLANDS.NTF\(aq
-# using driver \(gaUK .NTF\(aq successful.
-#
-# Layer name: BL2000_LINK
-# Geometry: Line String
-# Feature Count: 1
-# Extent: (419794.100000, 1069031.000000) \- (419927.900000, 1069153.500000)
-# Layer SRS WKT:
-# PROJCS[\(dqOSGB 1936 / British National Grid\(dq,
-# GEOGCS[\(dqOSGB 1936\(dq,
-# DATUM[\(dqOSGB_1936\(dq,
-# SPHEROID[\(dqAiry 1830\(dq,6377563.396,299.3249646]],
-# PRIMEM[\(dqGreenwich\(dq,0],
-# UNIT[\(dqdegree\(dq,0.0174532925199433]],
-# PROJECTION[\(dqTransverse_Mercator\(dq],
-# PARAMETER[\(dqlatitude_of_origin\(dq,49],
-# PARAMETER[\(dqcentral_meridian\(dq,\-2],
-# PARAMETER[\(dqscale_factor\(dq,0.999601272],
-# PARAMETER[\(dqfalse_easting\(dq,400000],
-# PARAMETER[\(dqfalse_northing\(dq,\-100000],
-# UNIT[\(dqmetre\(dq,1]]
-# LINE_ID: Integer (6.0)
-# GEOM_ID: Integer (6.0)
-# FEAT_CODE: String (4.0)
-# GLOBAL_LINK_ID: Integer (10.0)
-# TILE_REF: String (10.0)
-# OGRFeature(BL2000_LINK):2
-# LINE_ID (Integer) = 2
-# GEOM_ID (Integer) = 2
-# FEAT_CODE (String) = (null)
-# GLOBAL_LINK_ID (Integer) = 185878
-# TILE_REF (String) = SHETLAND I
-# LINESTRING (419832.100 1069046.300,419820.100 1069043.800,419808.300
-# 1069048.800,419805.100 1069046.000,419805.000 1069040.600,419809.400
-# 1069037.400,419827.400 1069035.600,419842 1069031,419859.000
-# 1069032.800,419879.500 1069049.500,419886.700 1069061.400,419890.100
-# 1069070.500,419890.900 1069081.800,419896.500 1069086.800,419898.400
-# 1069092.900,419896.700 1069094.800,419892.500 1069094.300,419878.100
-# 1069085.600,419875.400 1069087.300,419875.100 1069091.100,419872.200
-# 1069094.600,419890.400 1069106.400,419907.600 1069112.800,419924.600
-# 1069133.800,419927.900 1069146.300,419927.600 1069152.400,419922.600
-# 1069153.500,419917.100 1069153.500,419911.500 1069153.000,419908.700
-# 1069152.500,419903.400 1069150.800,419898.800 1069149.400,419894.800
-# 1069149.300,419890.700 1069149.400,419890.600 1069149.400,419880.800
-# 1069149.800,419876.900 1069148.900,419873.100 1069147.500,419870.200
-# 1069146.400,419862.100 1069143.000,419860 1069142,419854.900
-# 1069138.600,419850 1069135,419848.800 1069134.100,419843
-# 1069130,419836.200 1069127.600,419824.600 1069123.800,419820.200
-# 1069126.900,419815.500 1069126.900,419808.200 1069116.500,419798.700
-# 1069117.600,419794.100 1069115.100,419796.300 1069109.100,419801.800
-# 1069106.800,419805.000  1069107.300)
+Layer name: BL2000_LINK
+OGRFeature(BL2000_LINK):2
+  LINE_ID (Integer) = 2
+  GEOM_ID (Integer) = 2
+  FEAT_CODE (String) = (null)
+  GLOBAL_LINK_ID (Integer) = 185878
+  TILE_REF (String) = SHETLAND I
+  LINESTRING (419832.100 1069046.300,419820.100 1069043.800,...
 .ft P
 .fi
 .UNINDENT
@@ -679,9 +671,22 @@ ogrinfo input.shp \-sql \(dqALTER TABLE input ADD fieldX float\(dq
 .fi
 .UNINDENT
 .UNINDENT
+.sp
+Sometimes there is no input file involved in a calculation. In such cases one may
+use the \fB:memory:\fP input file which is a in\-memory empty SQLite file (and the SQLite SQL dialect will be implicitly used).
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+ogrinfo :memory: \-sql \(dqSELECT ST_Buffer(ST_GeomFromText(\(aqPOINT(0 0)\(aq), 1)\(dq
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
 .SH AUTHOR
 Frank Warmerdam <warmerdam@pobox.com>, Silke Reimer <silke@intevation.de>
 .SH COPYRIGHT
-1998-2024
+1998-2025
 .\" Generated by docutils manpage writer.
 .

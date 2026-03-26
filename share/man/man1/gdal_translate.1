@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "GDAL_TRANSLATE" "1" "Apr 02, 2024" "" "GDAL"
+.TH "GDAL_TRANSLATE" "1" "Apr 01, 2025" "" "GDAL"
 .SH NAME
 gdal_translate \- Converts raster data between different formats.
 .SH SYNOPSIS
@@ -52,9 +52,9 @@ gdal_translate [\-\-help] [\-\-help\-general] [\-\-long\-usage]
    [\-a_gt <gt0> <gt1> <gt2> <gt3> <gt4> <gt5>]
    [\-a_scale <value>] [\-a_offset <value>]
    [\-nogcp] [\-gcp <pixel> <line> <easting> <northing> [<elevation>]]...
-   |\-colorinterp{_bn} {red|green|blue|alpha|gray|undefined}]
-   |\-colorinterp {red|green|blue|alpha|gray|undefined},...]
-   [\-mo <META\-TAG>=<VALUE>]... [\-q] [\-sds]
+   |\-colorinterp{_bn} {red|green|blue|alpha|gray|undefined|pan|coastal|rededge|nir|swir|mwir|lwir|...}]
+   |\-colorinterp {red|green|blue|alpha|gray|undefined|pan|coastal|rededge|nir|swir|mwir|lwir|...},...]
+   [\-mo <META\-TAG>=<VALUE>]... [\-dmo \(dqDOMAIN:META\-TAG=VALUE\(dq]... [\-q] [\-sds]
    [\-co <NAME>=<VALUE>]... [\-stats] [\-norat] [\-noxmp]
    [\-oo <NAME>=<VALUE>]...
    <src_dataset> <dst_dataset>
@@ -215,23 +215,37 @@ for several gdal_translate invocation, it might be beneficial to call
 formats that support serializing statistics computations (GeoTIFF, VRT...)
 Note that the values specified after \fI\%\-scale\fP are only used to compute a scale and
 offset to apply to the input raster values. In particular, \fBsrc_min\fP and
-\fBsrc_max\fP are not used to clip input values.
+\fBsrc_max\fP are not used to clip input values unless \fI\%\-exponent\fP
+is also specified.
+Instead of being clipped, source values that are outside the range of \fBsrc_min\fP and \fBsrc_max\fP will be scaled to values outside the range of \fBdst_min\fP and \fBdst_max\fP\&.
+If clipping without exponential scaling is desired,
+\fB\-exponent 1\fP can be used.
 \fI\%\-scale\fP can be repeated several times (if specified only once,
 it also applies to all bands of the output dataset), so as to specify per
-band parameters. It is also possible to use the \(dq\-scale_bn\(dq syntax where bn
-is a band number (e.g. \(dq\-scale_2\(dq for the 2nd band of the output dataset)
+band parameters. It is also possible to use the \fB\-scale_bn\fP syntax where bn
+is a band number (e.g. \fB\-scale_2\fP for the 2nd band of the output dataset)
 to specify the parameters of one or several specific bands.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-exponent <exp_val>
-To apply non\-linear scaling with a power function. exp_val is the exponent
+Apply non\-linear scaling with a power function. \fBexp_val\fP is the exponent
 of the power function (must be positive). This option must be used with the
-\-scale option. If specified only once, \-exponent applies to all bands of
+\fI\%\-scale\fP option. If specified only once, \fI\%\-exponent\fP applies
+to all bands of
 the output image. It can be repeated several times so as to specify per
-band parameters. It is also possible to use the \(dq\-exponent_bn\(dq syntax where
-bn is a band number (e.g. \(dq\-exponent_2\(dq for the 2nd band of the output
+band parameters. It is also possible to use the \fB\-exponent_bn\fP syntax where
+bn is a band number (e.g. \fB\-exponent_2\fP for the 2nd band of the output
 dataset) to specify the parameters of one or several specific bands.
+.sp
+The scaled value \fBDst\fP is calculated from the source value \fBSrc\fP with the following
+formula:
+.sp
+.ce
+{Dst} = \eleft( {Dst}_{max} \- {Dst}_{min} \eright) \etimes \eoperatorname{max} \eleft( 0, \eoperatorname{min} \eleft( 1, \eleft( \efrac{{Src} \- {Src}_{min}}{{Src}_{max}\-{Src}_{min}} \eright)^{exp\e_val} \eright) \eright) + {Dst}_{min}
+
+
+.ce 0
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -386,7 +400,7 @@ value to be changed to the value specified with this option.
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-colorinterp_X <red|green|blue|alpha|gray|undefined>
+.B \-colorinterp_X <red|green|blue|alpha|gray|undefined|pan|coastal|rededge|nir|swir|mwir|lwir|...>
 Override the color interpretation of band X (where X is a valid band number,
 starting at 1)
 .sp
@@ -395,7 +409,7 @@ New in version 2.3.
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-colorinterp {red|green|blue|alpha|gray|undefined},...
+.B \-colorinterp {red|green|blue|alpha|gray|undefined|pan|coastal|rededge|nir|swir|mwir|lwir|...},...
 Override the color interpretation of all specified bands. For
 example \-colorinterp red,green,blue,alpha for a 4 band output dataset.
 .sp
@@ -406,6 +420,14 @@ New in version 2.3.
 .TP
 .B \-mo <META\-TAG>=<VALUE>
 Passes a metadata key and value to set on the output dataset if possible.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-dmo DOMAIN:META\-TAG=VALUE
+Passes a metadata key and value in specified domain to set on the output dataset if possible.
+.sp
+New in version 3.9.
+
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -429,12 +451,12 @@ In addition to the driver\-specific creation options, gdal_translate
 the following options:
 .INDENT 7.0
 .IP \(bu 2
-\fBAPPEND_SUBDATASET=[YES/NO]: \fP Defaults to \fBNO\fP\&. 
+\fBAPPEND_SUBDATASET=[YES​/​NO]: \fP Defaults to \fBNO\fP\&. 
 .sp
 Can be specified to YES to avoid prior destruction of existing dataset,
 for drivers that support adding several subdatasets (e.g. GTIFF, NITF)
 .IP \(bu 2
-\fBCOPY_SRC_MDD=[AUTO/YES/NO]: \fP (GDAL >= 3.8)  Defaults to \fBAUTO\fP\&. 
+\fBCOPY_SRC_MDD=[AUTO​/​YES​/​NO]: \fP (GDAL >= 3.8)  Defaults to \fBAUTO\fP\&. 
 .sp
 Defines if metadata domains of the source dataset should be copied to the
 destination dataset.
@@ -563,7 +585,8 @@ To create a JPEG\-compressed TIFF with internal mask from a RGBA dataset
 .sp
 .nf
 .ft C
-gdal_translate rgba.tif withmask.tif \-b 1 \-b 2 \-b 3 \-mask 4 \-co COMPRESS=JPEG \-co PHOTOMETRIC=YCBCR \-\-config GDAL_TIFF_INTERNAL_MASK YES
+gdal_translate rgba.tif withmask.tif \-b 1 \-b 2 \-b 3 \-mask 4 \-co COMPRESS=JPEG \e
+  \-co PHOTOMETRIC=YCBCR \-\-config GDAL_TIFF_INTERNAL_MASK YES
 .ft P
 .fi
 .UNINDENT
@@ -595,6 +618,6 @@ gdal_translate \-projwin \-20037500 10037500 0 0 \-outsize 100 100 frmt_wms_goog
 .SH AUTHOR
 Frank Warmerdam <warmerdam@pobox.com>, Silke Reimer <silke@intevation.de>
 .SH COPYRIGHT
-1998-2024
+1998-2025
 .\" Generated by docutils manpage writer.
 .

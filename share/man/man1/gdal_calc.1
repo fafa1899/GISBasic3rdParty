@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "GDAL_CALC" "1" "Apr 02, 2024" "" "GDAL"
+.TH "GDAL_CALC" "1" "Apr 01, 2025" "" "GDAL"
 .SH NAME
 gdal_calc \- Command line raster calculator with numpy syntax.
 .SH SYNOPSIS
@@ -36,7 +36,7 @@ gdal_calc \- Command line raster calculator with numpy syntax.
 .sp
 .nf
 .ft C
-gdal_calc.py [\-\-help] [\-\-help\-general]
+gdal_calc [\-\-help] [\-\-help\-general]
              \-\-calc=expression \-\-outfile=<out_filename> [\-A <filename>]
              [\-\-A_band=<n>] [\-B...\-Z <filename>] [<other_options>]
 .ft P
@@ -51,6 +51,13 @@ arithmetic supported by numpy arrays such as \fB+\fP, \fB\-\fP, \fB*\fP, and
 \fB/\fP along with logical operators such as \fB>\fP\&.
 Note that all files must have the same dimensions (unless extent option is used),
 but no projection checking is performed (unless projectionCheck option is used).
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
+gdal_calc is a Python utility, and is only available if GDAL Python bindings are available.
+.UNINDENT
+.UNINDENT
 .INDENT 0.0
 .TP
 .B \-\-help
@@ -122,7 +129,7 @@ Output datatype, must be one of [\fBByte\fP, \fBInt8\fP, \fBUInt16\fP, \fBInt16\
 \fBNOTE:\fP
 .INDENT 7.0
 .INDENT 3.5
-Despite the datatype set using \fB\-\-type\fP, when doing intermediate aritmethic operations using operands of the
+Despite the datatype set using \fB\-\-type\fP, when doing intermediate arithmetic operations using operands of the
 same type, the operation result will honor the original datatype. This may lead into unexpected results in the final result.
 .UNINDENT
 .UNINDENT
@@ -239,7 +246,7 @@ If enabled, the output dataset would be returned from the function and not close
 .B color_table
 Allows specifying a ColorTable object (with Palette Index interpretation) to be used for the output raster.
 .UNINDENT
-.SH EXAMPLE
+.SH EXAMPLES
 .sp
 Add two files together:
 .INDENT 0.0
@@ -247,7 +254,7 @@ Add two files together:
 .sp
 .nf
 .ft C
-gdal_calc.py \-A input1.tif \-B input2.tif \-\-outfile=result.tif \-\-calc=\(dqA+B\(dq
+gdal_calc \-A input1.tif \-B input2.tif \-\-outfile=result.tif \-\-calc=\(dqA+B\(dq
 .ft P
 .fi
 .UNINDENT
@@ -259,7 +266,7 @@ Average of two layers:
 .sp
 .nf
 .ft C
-gdal_calc.py \-A input1.tif \-B input2.tif \-\-outfile=result.tif \-\-calc=\(dq(A+B)/2\(dq
+gdal_calc \-A input1.tif \-B input2.tif \-\-outfile=result.tif \-\-calc=\(dq(A+B)/2\(dq
 .ft P
 .fi
 .UNINDENT
@@ -275,7 +282,7 @@ may need to force the conversion of one of the operands before the division oper
 .sp
 .nf
 .ft C
-gdal_calc.py \-A input.tif \-B input2.tif \-\-outfile=result.tif \-\-calc=\(dq(A.astype(numpy.float64) + B) / 2\(dq
+gdal_calc \-A input.tif \-B input2.tif \-\-outfile=result.tif \-\-calc=\(dq(A.astype(numpy.float64) + B) / 2\(dq
 .ft P
 .fi
 .UNINDENT
@@ -289,20 +296,17 @@ Add three files together (two options with the same result):
 .sp
 .nf
 .ft C
-gdal_calc.py \-A input1.tif \-B input2.tif \-C input3.tif \-\-outfile=result.tif \-\-calc=\(dqA+B+C\(dq
+gdal_calc \-A input1.tif \-B input2.tif \-C input3.tif \-\-outfile=result.tif \-\-calc=\(dqA+B+C\(dq
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
-.sp
-New in version 3.3.
-
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-gdal_calc.py \-A input1.tif \-A input2.tif \-A input3.tif \-\-outfile=result.tif \-\-calc=\(dqnumpy.sum(A,axis=0)\(dq.
+gdal_calc \-A input1.tif \-A input2.tif \-A input3.tif \-\-outfile=result.tif \-\-calc=\(dqnumpy.sum(A,axis=0)\(dq.
 .ft P
 .fi
 .UNINDENT
@@ -314,20 +318,17 @@ Average of three layers (two options with the same result):
 .sp
 .nf
 .ft C
-gdal_calc.py \-A input1.tif \-B input2.tif \-C input3.tif \-\-outfile=result.tif \-\-calc=\(dq(A+B+C)/3\(dq
+gdal_calc \-A input1.tif \-B input2.tif \-C input3.tif \-\-outfile=result.tif \-\-calc=\(dq(A+B+C)/3\(dq
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
-.sp
-New in version 3.3.
-
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-gdal_calc.py \-A input1.tif input2.tif input3.tif \-\-outfile=result.tif \-\-calc=\(dqnumpy.average(a,axis=0)\(dq.
+gdal_calc \-A input1.tif input2.tif input3.tif \-\-outfile=result.tif \-\-calc=\(dqnumpy.average(a,axis=0)\(dq.
 .ft P
 .fi
 .UNINDENT
@@ -339,20 +340,17 @@ Maximum of three layers  (two options with the same result):
 .sp
 .nf
 .ft C
-gdal_calc.py \-A input1.tif \-B input2.tif \-C input3.tif \-\-outfile=result.tif \-\-calc=\(dqnumpy.max((A,B,C),axis=0)\(dq
+gdal_calc \-A input1.tif \-B input2.tif \-C input3.tif \-\-outfile=result.tif \-\-calc=\(dqnumpy.max((A,B,C),axis=0)\(dq
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
-.sp
-New in version 3.3.
-
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-gdal_calc.py \-A input1.tif input2.tif input3.tif \-\-outfile=result.tif \-\-calc=\(dqnumpy.max(A,axis=0)\(dq
+gdal_calc \-A input1.tif input2.tif input3.tif \-\-outfile=result.tif \-\-calc=\(dqnumpy.max(A,axis=0)\(dq
 .ft P
 .fi
 .UNINDENT
@@ -364,7 +362,7 @@ Set values of zero and below to null:
 .sp
 .nf
 .ft C
-gdal_calc.py \-A input.tif \-\-outfile=result.tif \-\-calc=\(dqA*(A>0)\(dq \-\-NoDataValue=0
+gdal_calc \-A input.tif \-\-outfile=result.tif \-\-calc=\(dqA*(A>0)\(dq \-\-NoDataValue=0
 .ft P
 .fi
 .UNINDENT
@@ -376,7 +374,7 @@ Using logical operator to keep a range of values from input:
 .sp
 .nf
 .ft C
-gdal_calc.py \-A input.tif \-\-outfile=result.tif \-\-calc=\(dqA*logical_and(A>100,A<150)\(dq
+gdal_calc \-A input.tif \-\-outfile=result.tif \-\-calc=\(dqA*logical_and(A>100,A<150)\(dq
 .ft P
 .fi
 .UNINDENT
@@ -388,7 +386,8 @@ Work with multiple bands:
 .sp
 .nf
 .ft C
-gdal_calc.py \-A input.tif \-\-A_band=1 \-B input.tif \-\-B_band=2 \-\-outfile=result.tif \-\-calc=\(dq(A+B)/2\(dq \-\-calc=\(dqB*logical_and(A>100,A<150)\(dq
+gdal_calc \-A input.tif \-\-A_band=1 \-B input.tif \-\-B_band=2 \e
+  \-\-outfile=result.tif \-\-calc=\(dq(A+B)/2\(dq \-\-calc=\(dqB*logical_and(A>100,A<150)\(dq
 .ft P
 .fi
 .UNINDENT
@@ -396,6 +395,6 @@ gdal_calc.py \-A input.tif \-\-A_band=1 \-B input.tif \-\-B_band=2 \-\-outfile=r
 .SH AUTHOR
 Chris Yesson <chris dot yesson at ioz dot ac dot uk>, Etienne Tourigny <etourigny dot dev at gmail dot com>
 .SH COPYRIGHT
-1998-2024
+1998-2025
 .\" Generated by docutils manpage writer.
 .

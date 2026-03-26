@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "GDALTRANSFORM" "1" "Apr 02, 2024" "" "GDAL"
+.TH "GDALTRANSFORM" "1" "Apr 01, 2025" "" "GDAL"
 .SH NAME
 gdaltransform \- Transforms coordinates.
 .SH SYNOPSIS
@@ -37,11 +37,12 @@ gdaltransform \- Transforms coordinates.
 .nf
 .ft C
 gdaltransform [\-\-help] [\-\-help\-general]
-    [\-i] [\-s_srs <srs_def>] [\-t_srs <srs_def>] [\-to >NAME>=<VALUE>]...
+    [\-i] [\-s_srs <srs_def>] [\-t_srs <srs_def>] [\-to <NAME>=<VALUE>]...
     [\-s_coord_epoch <epoch>] [\-t_coord_epoch <epoch>]
     [\-ct <proj_string>] [\-order <n>] [\-tps] [\-rpc] [\-geoloc]
-    [\-gcp <pixel> <line> <easting> <northing> [elevation]]... [\-output_xy]
-    [srcfile [dstfile]]
+    [\-gcp <pixel> <line> <easting> <northing> [elevation]]...
+    [\-output_xy] [\-E] [\-field_sep <sep>] [\-ignore_extra_input]
+    [<srcfile> [<dstfile>]]
 .ft P
 .fi
 .UNINDENT
@@ -79,7 +80,7 @@ Assign a coordinate epoch, linked with the source SRS. Useful when the
 source SRS is a dynamic CRS. Only taken into account if \fI\%\-s_srs\fP
 is used.
 .sp
-Before PROJ 9.4, \fI\%\-s_coord_epoch\fP and \fI\%\-t_coord_epoch\fP are
+Before PROJ 9.4, \fI\%\-s_coord_epoch\fP and \fI\%\-t_coord_epoch\fP were
 mutually exclusive, due to lack of support for transformations between two dynamic CRS.
 .UNINDENT
 .INDENT 0.0
@@ -101,7 +102,7 @@ Assign a coordinate epoch, linked with the output SRS. Useful when the
 output SRS is a dynamic CRS. Only taken into account if \fI\%\-t_srs\fP
 is used.
 .sp
-Before PROJ 9.4, \fI\%\-s_coord_epoch\fP and \fI\%\-t_coord_epoch\fP are
+Before PROJ 9.4, \fI\%\-s_coord_epoch\fP and \fI\%\-t_coord_epoch\fP were
 mutually exclusive, due to lack of support for transformations between two dynamic CRS.
 .UNINDENT
 .INDENT 0.0
@@ -150,7 +151,7 @@ Inverse transformation: from destination to source.
 .INDENT 0.0
 .TP
 .B \-gcp <pixel> <line> <easting> <northing> [<elevation>]
-Provide a GCP to be used for transformation (generally three or more are required)
+Provide a GCP to be used for transformation (generally three or more are required). Pixel and line need not be integers.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -159,21 +160,53 @@ Restrict output to \(dqx y\(dq instead of \(dqx y z\(dq
 .UNINDENT
 .INDENT 0.0
 .TP
+.B \-ignore_extra_input
+New in version 3.9.
+
+.sp
+Set this flag to avoid extra non\-numeric content at end of input lines to be
+appended to the output lines.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-E
+New in version 3.9.
+
+.sp
+Enable Echo mode, where input coordinates are prepended to the output lines.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-field_sep <sep>
+New in version 3.9.
+
+.sp
+Defines the field separator, to separate different values.
+It defaults to the space character.
+.UNINDENT
+.INDENT 0.0
+.TP
 .B <srcfile>
-File with source projection definition or GCP\(aqs. If
-not given, source projection is read from the command\-line \fI\%\-s_srs\fP
-or \fI\%\-gcp\fP parameters
+Raster dataset with source projection definition or GCPs. If
+not given, source projection/GCPs are read from the command\-line \fI\%\-s_srs\fP
+or \fI\%\-gcp\fP parameters.
+.sp
+Note that only the SRS and/or GCPs of this input file is taken into account, and not its pixel content.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B <dstfile>
-File with destination projection definition.
+Raster dataset with destination projection definition.
 .UNINDENT
 .sp
 Coordinates are read as pairs, triples (for 3D,) or (since GDAL 3.0.0,) quadruplets
 (for X,Y,Z,time) of numbers per line from standard
 input, transformed, and written out to standard output in the same way. All
 transformations offered by gdalwarp are handled, including gcp\-based ones.
+.sp
+Starting with GDAL 3.9, additional non\-numeric content (typically point name)
+at the end of an input line will also be appended to the output line, unless
+the \fI\%\-ignore_extra_input\fP is added.
 .sp
 Note that input and output must always be in decimal form.  There is currently
 no support for DMS input or output.
@@ -204,7 +237,7 @@ Produces the following output in meters in the \(dqBelge 1972 / Belgian Lambert
 .sp
 .nf
 .ft C
-244510.77404604 166154.532871342 \-1046.79270555763
+244296.724777415 165937.350217148 0
 .ft P
 .fi
 .UNINDENT
@@ -259,7 +292,7 @@ gdaltransform \-ct \(dq+proj=pipeline +step +proj=unitconvert +xy_in=deg \e
 .UNINDENT
 .UNINDENT
 .sp
-Produces this output measured in longitude degrees, latitude degrees and ellipsoid height in metre:
+Produces this output measured in longitude degrees, latitude degrees and ellipsoid height in meters:
 .INDENT 0.0
 .INDENT 3.5
 .sp
@@ -270,9 +303,56 @@ Produces this output measured in longitude degrees, latitude degrees and ellipso
 .fi
 .UNINDENT
 .UNINDENT
+.SS Ground control points
+.sp
+Task: find one address and assign another.
+We pick Salt Lake City, where road names \fIare\fP their grid values.
+We first establish some ground control points at road intersections.
+We\(aqll use \fI\%\-\-optfile\fP for easy reuse of our GCPs.
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+echo \-output_xy \e
+\-gcp 0   0    \-111.89114717 40.76932606 \e
+\-gcp 0   \-500 \-111.89114803 40.75846686 \e
+\-gcp 500 0    \-111.87685039 40.76940631 > optfile.txt
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+Where is the address \(dq370 S. 300 E.\(dq?
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+echo 300 \-370 370 S. 300 E. | gdaltransform \-\-optfile optfile.txt
+\-111.8825697384 40.761338402 370 S. 300 E.
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+Nearby, a newly constructed building needs an address assigned. We use \fI\%\-i\fP:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+echo \-111.88705 40.76502 Building ABC123 | gdaltransform \-i \-\-optfile optfile.txt
+143.301947786644 \-199.32683635161 Building ABC123
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+(i.e., 143 E. 200 S. Or 144 if across the street.)
 .SH AUTHOR
 Frank Warmerdam <warmerdam@pobox.com>, Jan Hartmann <j.l.h.hartmann@uva.nl>
 .SH COPYRIGHT
-1998-2024
+1998-2025
 .\" Generated by docutils manpage writer.
 .

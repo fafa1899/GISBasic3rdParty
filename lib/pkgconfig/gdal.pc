@@ -1,4 +1,4 @@
-CONFIG_VERSION=3.8.5
+CONFIG_VERSION=3.10.3
 CONFIG_INST_PREFIX=C:/Github/GISBasic3rdParty
 CONFIG_INST_LIBS=-LIBPATH:C:/Github/GISBasic3rdParty/lib gdal
 CONFIG_INST_CFLAGS=-IC:/Github/GISBasic3rdParty/include
@@ -13,5 +13,5 @@ Name: libgdal
 Description: Geospatial Data Abstraction Library
 Version: ${CONFIG_VERSION}
 Libs: ${CONFIG_INST_LIBS}
-Libs.private: wbemuuid C:/Github/GISBasic3rdParty/lib/tiff.lib ws2_32 C:/Github/GISBasic3rdParty/lib/jpeg.lib C:/Github/GISBasic3rdParty/lib/libpng16.lib C:/Github/GISBasic3rdParty/lib/giflib.lib C:/Github/GISBasic3rdParty/lib/libwebp.lib C:/Github/GISBasic3rdParty/lib/zlib.lib C:/Github/GISBasic3rdParty/lib/sqlite3.lib legacy_stdio_definitions.lib odbccp32.lib C:/Github/GISBasic3rdParty/lib/geos_c.lib psapi C:/Github/GISBasic3rdParty/lib/proj.lib
+Libs.private: C:/Github/GISBasic3rdParty/lib/iconv.lib C:/Github/GISBasic3rdParty/lib/charset.lib C:/Github/GISBasic3rdParty/lib/libssl.lib C:/Github/GISBasic3rdParty/lib/libcrypto.lib crypt32 wbemuuid C:/Github/GISBasic3rdParty/lib/tiff.lib ws2_32 C:/Github/GISBasic3rdParty/lib/jpeg.lib C:/Github/GISBasic3rdParty/lib/libpng16.lib C:/Github/GISBasic3rdParty/lib/giflib.lib C:/Github/GISBasic3rdParty/lib/libwebp.lib C:/Github/GISBasic3rdParty/lib/zlib.lib C:/Work/3rdparty/lib/spatialite_i.lib C:/Github/GISBasic3rdParty/lib/sqlite3.lib C:/Users/Charlee/anaconda3/Library/lib/libpq.lib legacy_stdio_definitions.lib odbccp32.lib C:/Work/3rdparty/lib/freexl_i.lib C:/Github/GISBasic3rdParty/lib/libexpat.lib C:/Github/GISBasic3rdParty/lib/libxml2.lib C:/Github/GISBasic3rdParty/lib/geos_c.lib C:/Github/GISBasic3rdParty/lib/libcurl_imp.lib psapi C:/Github/GISBasic3rdParty/lib/proj.lib
 Cflags: ${CONFIG_INST_CFLAGS}

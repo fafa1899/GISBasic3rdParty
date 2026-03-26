@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "GDALWARP" "1" "Apr 02, 2024" "" "GDAL"
+.TH "GDALWARP" "1" "Apr 01, 2025" "" "GDAL"
 .SH NAME
 gdalwarp \- Image reprojection and warping utility.
 .SH SYNOPSIS
@@ -36,25 +36,36 @@ gdalwarp \- Image reprojection and warping utility.
 .sp
 .nf
 .ft C
-gdalwarp [\-\-help] [\-\-help\-general] [\-\-formats]
-    [\-b|\-srcband <n>]... [\-dstband <n>]...
-    [\-s_srs <srs_def>] [\-t_srs <srs_def>] [\-ct <string>]
-    [\-to <NAME>=<VALUE>]... [\-vshift | \-novshift]
-    [\-s_coord_epoch <epoch>] [\-t_coord_epoch <epoch>]
-    [\-order n | \-tps | \-rpc | \-geoloc] [\-et <err_threshold>]
-    [\-refine_gcps <tolerance> [<minimum_gcps>]]
-    [\-te <xmin> <ymin> <xmax> <ymax>] [\-te_srs <srs_def>]
-    [\-tr <xres> <yres>]|[\-tr square] [\-tap] [\-ts <width> <height>]
-    [\-ovr <level>|AUTO|AUTO\-<n>|NONE] [\-wo <NAME>=<VALUE>]... [\-ot Byte/Int16/...] [\-wt Byte/Int16]
-    [\-srcnodata \(dq<value>[ <value>...]\(dq][\-dstnodata \(dq<value>[ <value>...]\(dq]
-    [\-srcalpha|\-nosrcalpha] [\-dstalpha]
-    [\-r <resampling_method>] [\-wm <memory_in_mb>] [\-multi] [\-q]
-    [\-cutline <datasource>] [\-cl <layer>] [\-cwhere <expression>]
-    [\-csql <statement>] [\-cblend <dist_in_pixels>] [\-crop_to_cutline]
-    [\-if <format>]... [\-of <format>] [\-co <NAME>=<VALUE>]... [\-overwrite]
-    [\-nomd] [\-cvmd <meta_conflict_value>] [\-setci] [\-oo <NAME>=<VALUE>]...
-    [\-doo <NAME>=<VALUE>]...
-    <srcfile>... <dstfile>
+gdalwarp [\-\-help] [\-\-long\-usage] [\-\-help\-general]
+         [\-\-quiet] [\-overwrite] [\-of <output_format>] [\-co <NAME>=<VALUE>]...
+         [\-s_srs <srs_def>] [\-t_srs <srs_def>]
+         [[\-srcalpha]|[\-nosrcalpha]]
+         [\-dstalpha] [\-tr <xres> <yres>|square] [\-ts <width> <height>]
+         [\-te <xmin> <ymin> <xmax> <ymax]
+         [\-te_srs <srs_def>]
+         [\-r near|bilinear|cubic|cubicspline|lanczos|average|rms|mode|min|max|med|q1|q3|sum]
+         [\-ot Byte|Int8|[U]Int{16|32|64}|CInt{16|32}|[C]Float{32|64}]
+         <src_dataset_name>... <dst_dataset_name>
+
+Advanced options:
+         [\-wo <NAME>=<VALUE>]... [\-multi]
+         [\-s_coord_epoch <epoch>] [\-t_coord_epoch <epoch>] [\-ct <string>]
+         [[\-tps]|[\-rpc]|[\-geoloc]]
+         [\-order <1|2|3>] [\-refine_gcps <tolerance> [<minimum_gcps>]]
+         [\-to <NAME>=<VALUE>]...
+         [\-et <err_threshold>] [\-wm <memory_in_mb>]
+         [\-srcnodata \(dq<value>[ <value>]...\(dq]
+         [\-dstnodata \(dq<value>[ <value>]...\(dq] [\-tap]
+         [\-wt Byte|Int8|[U]Int{16|32|64}|CInt{16|32}|[C]Float{32|64}]
+         [\-cutline <datasource>|<WKT>] [\-cutline_srs <srs_def>]
+         [\-cwhere <expression>]
+         [[\-cl <layername>]|[\-csql <query>]]
+         [\-cblend <distance>] [\-crop_to_cutline]
+         [\-nomd] [\-cvmd <meta_conflict_value>] [\-setci]
+         [\-oo <NAME>=<VALUE>]... [\-doo <NAME>=<VALUE>]...
+         [\-ovr <level>|AUTO|AUTO\-<n>|NONE]
+         [[\-vshift]|[\-novshiftgrid]]
+         [\-if <format>]... [\-srcband <band>]... [\-dstband <band>]...
 .ft P
 .fi
 .UNINDENT
@@ -173,7 +184,7 @@ Assign a coordinate epoch, linked with the source SRS. Useful when the
 source SRS is a dynamic CRS. Only taken into account if \fI\%\-s_srs\fP
 is used.
 .sp
-Before PROJ 9.4, \fI\%\-s_coord_epoch\fP and \fI\%\-t_coord_epoch\fP are
+Before PROJ 9.4, \fI\%\-s_coord_epoch\fP and \fI\%\-t_coord_epoch\fP were
 mutually exclusive, due to lack of support for transformations between two dynamic CRS.
 .UNINDENT
 .INDENT 0.0
@@ -205,7 +216,7 @@ Assign a coordinate epoch, linked with the target SRS. Useful when the
 target SRS is a dynamic CRS. Only taken into account if \fI\%\-t_srs\fP
 is used.
 .sp
-Before PROJ 9.4, \fI\%\-s_coord_epoch\fP and \fI\%\-t_coord_epoch\fP are
+Before PROJ 9.4, \fI\%\-s_coord_epoch\fP and \fI\%\-t_coord_epoch\fP were
 mutually exclusive, due to lack of support for transformations between two dynamic CRS.
 .UNINDENT
 .INDENT 0.0
@@ -214,8 +225,13 @@ mutually exclusive, due to lack of support for transformations between two dynam
 A PROJ string (single step operation or multiple step string
 starting with +proj=pipeline), a WKT2 string describing a CoordinateOperation,
 or a \fI\%urn:ogc:def:coordinateOperation:EPSG::XXXX\fP URN overriding the default
-transformation from the source to the target CRS. It must take into account the
-axis order of the source and target CRS.
+transformation from the source to the target CRS.
+.sp
+It must take into account the axis order of the source and target CRS, that
+is typically include a \fBstep proj=axisswap order=2,1\fP at the beginning of
+the pipeline if the source CRS has northing/easting axis order, and/or at
+the end of the pipeline if the target CRS has northing/easting axis order.
+.sp
 When creating a new output file, using \fI\%\-t_srs\fP is still necessary
 to have the target CRS written in the metadata of the output file,
 but the parameters of the CoordinateOperation will override those of the
@@ -280,10 +296,10 @@ Force use of Geolocation Arrays.
 .INDENT 0.0
 .TP
 .B \-et <err_threshold>
-Error threshold for transformation approximation (in pixel units \-
-defaults to 0.125, unless, starting with GDAL 2.1, the RPC_DEM transformer
-option is specified, in which case, an exact transformer, i.e.
-err_threshold=0, will be used).
+Error threshold for transformation approximation, expressed as a number of
+source pixels. Defaults to 0.125 pixels unless the \fBRPC_DEM\fP transformer
+option is specified, in which case an exact transformer, i.e.
+\fBerr_threshold=0\fP, will be used.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -418,7 +434,7 @@ will be used by default by selecting the closest overview to the desired output
 resolution.
 The resampling method used to create those overviews is generally not the one you
 specify through the \fI\%\-r\fP option. Some formats, like JPEG2000, can contain
-significant outliers due to wavelet compression works. It might thus be useful in
+significant outliers due to how wavelet compression works. It might thus be useful in
 those situations to use the \fI\%\-ovr\fP \fBNONE\fP option to prevent existing overviews to
 be used.
 .UNINDENT
@@ -477,8 +493,13 @@ Create an output alpha band to identify nodata (unset/transparent) pixels.
 .TP
 .B \-wm <memory_in_mb>
 Set the amount of memory that the
-warp API is allowed to use for caching. The value is interpreted as being
-in megabytes if the value is less than 10000. For values >=10000, this is
+warp API is allowed to use for caching.
+Defaults to 64 MB.
+Since GDAL 3.10, the value can be specified either as a fixed amount of
+memory (e.g., \fB\-wm 200MB\fP, \fB\-wm 1G\fP) or as a percentage of usable
+RAM (\fB\-wm 10%\fP).
+In earlier versions, or if a unit is not specified, the value is interpreted as being
+in megabytes if the value is less than 10000. For values >=10000, it is
 interpreted as bytes.
 .sp
 The warper will total up the memory required to hold the input and output
@@ -543,8 +564,18 @@ specific documentation for legal creation options for each format.
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-cutline <datasource>
-Enable use of a blend cutline from the name OGR support datasource.
+.B \-cutline <datasource>|<WKT>
+Enable use of a blend cutline from the name of a vector dataset.
+Starting with GDAL 3.9, a WKT geometry string starting with POLYGON or
+MULTIPOLYGON can also be specified.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-cutline_srs <srs_def>
+New in version 3.9.
+
+.sp
+Sets or overrides the SRS of the cutline.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -613,30 +644,64 @@ New in version 2.1.
 .UNINDENT
 .INDENT 0.0
 .TP
-.B <srcfile>
+.B <src_dataset_name>
 The source file name(s).
 .UNINDENT
 .INDENT 0.0
 .TP
-.B <dstfile>
+.B <dst_dataset_name>
 The destination file name.
 .UNINDENT
+.SH OVERVIEW
 .sp
-Mosaicing into an existing output file is supported if the output file
-already exists. The spatial extent of the existing file will not
-be modified to accommodate new data, so you may have to remove it in that case, or
-use the \-overwrite option.
+\fBgdalwarp\fP transforms images between different coordinate reference
+systems and spatial resolutions.
 .sp
-Polygon cutlines may be used as a mask to restrict the area of the
-destination file that may be updated, including blending.  If the OGR
-layer containing the cutline features has no explicit SRS, the cutline
-features must be in the SRS of the destination file. When writing to a
-not yet existing target dataset, its extent will be the one of the
-original raster unless \-te or \-crop_to_cutline are specified.
+First, \fBgdalwarp\fP must determine the extent and resolution of the
+output, if these have not been specified using \fI\%\-te\fP and \fI\%\-tr\fP\&.
+These are determined by transforming a sample of points from the source CRS to
+the destination CRS. Details of the procedure can be found in the documentation
+for \fI\%GDALSuggestedWarpOutput()\fP\&. If multiple inputs are provided to
+\fBgdalwarp\fP, the output extent will be calculated to cover all of them,
+at a resolution consistent with the highest\-resolution input.
 .sp
-Starting with GDAL 3.1, it is possible to use as output format a driver that
-only supports the CreateCopy operation. This may internally imply creation of
-a temporary file.
+Once the dimensions of the output image have been determined,
+\fBgdalwarp\fP divides the output image into chunks that can be processed
+independently within the amount of memory specified by \fI\%\-wm\fP\&.
+\fBgdalwarp\fP then iterates over scanlines in these chunks, and for each
+output pixel determines a rectangular region of source pixels that contribute
+to the value of the output pixel. The dimensions of this rectangular region
+are typically determined by estimating the relative scales of the source and
+destination raster, but can be manually specified (see documentation of the
+\fBXSCALE\fP parameter in \fI\%GDALWarpOptions::papszWarpOptions\fP).
+Because the source region is a simple rectangle, it is not possible for an
+output pixel to be associated with source pixels from both sides of the
+antimeridian or pole (when transforming from geographic coordinates).
+.sp
+The rectangular region of source pixels is then provided to a function that
+performs the resampling algorithm selected with \fI\%\-r\fP\&.  Depending on the
+resampling algorithm and relative scales of the source and destination rasters,
+source pixels may be weighted either according to the approximate fraction of
+the source pixel that is covered by the destination pixel (e.g., \(dqmean\(dq and
+\(dqsum\(dq resampling), or by horizontal and vertical Cartesian distances between
+the center of the source pixel and the center of the target pixel (e.g.,
+bilinear or cubic spline resampling). In the latter case, the relative weight
+of an individual source pixel is determined by the product of the weights
+determined for its row and column; the diagonal Cartesian distance is not
+calculated.
+.SH WRITING TO AN EXISTING FILE
+.sp
+Mosaicing into an existing output file is supported if the output file already
+exists. The spatial extent of the existing file will not be modified to
+accommodate new data, so you may have to remove it in that case, or use the
+\fI\%\-overwrite\fP option.
+.sp
+Polygon cutlines may be used as a mask to restrict the area of the destination
+file that may be updated, including blending.  If the OGR layer containing the
+cutline features has no explicit SRS, the cutline features are assumed to be in
+the SRS of the destination file. When writing to a not yet existing target
+dataset, its extent will be the one of the original raster unless \fI\%\-te\fP
+or \fI\%\-crop_to_cutline\fP are specified.
 .SH NODATA / SOURCE VALIDITY MASK HANDLING
 .sp
 Invalid values in source pixels, either identified through a nodata value
@@ -692,19 +757,54 @@ gdalwarp black\-nodata.tif grey\-nodata.tif white\-nodata.tif final\-mosaic.tif
 .SH APPROXIMATE TRANSFORMATION
 .sp
 By default \fBgdalwarp\fP uses a linear approximator for the
-transformations with a permitted error of 0.125 pixels. The approximator
-basically transforms three points on a scanline: the start, end and middle.
-Then it compares the linear approximation of the center based on the end points
-to the real thing and checks the error. If the error is less than the error
-threshold then the remaining points are approximated (in two chunks utilizing
-the center point). If the error exceeds the threshold, the scanline is split
-into two sections, and the approximator is recursively applied to each section
-until the error is less than the threshold or all points have been exactly
-computed.
+transformations with a permitted error of 0.125 pixels in the source dataset.
+The approximator precisely transforms three points per output scanline (the
+start, middle, and end) from a row and column in the output dataset to a
+row and column in the source dataset.
+It then compares a linear approximation of the center point coordinates to the
+precisely transformed value.
+If the sum of the horizontal and vertical errors is less than the error
+threshold then the remaining source points are approximated using linear
+interpolation between the start and middle point, and between the middle and
+end point.
+If the error exceeds the threshold, the scanline is split into two sections and
+the approximator is recursively applied to each section until the error is less
+than the threshold or all points have been exactly computed.
 .sp
-The error threshold (in pixels) can be controlled with the gdalwarp
+The error threshold (in source dataset pixels) can be controlled with the gdalwarp
 \fI\%\-et\fP switch. If you want to compare a true pixel\-by\-pixel reprojection
 use \fI\%\-et 0\fP which disables this approximator entirely.
+.SH VERTICAL TRANSFORMATION
+.sp
+While gdalwarp is most commonly used to perform coordinate transformations in the 2D
+space, it can also perform vertical transformations. Vertical transformations are
+automatically performed when the following two conditions are met:
+.INDENT 0.0
+.IP \(bu 2
+at least one of the source or target CRS has an explicit vertical CRS
+(as part of a compound CRS) or is a 3D (generally geographic) CRS, and
+.IP \(bu 2
+the raster has a single band
+.UNINDENT
+.sp
+This mode can also be forced by using the \fI\%\-vshift\fP (this is
+essentially useful when the CRS involved are not explicitly 3D, but a
+transformation pipeline is specified with \fI\%\-ct\fP), or disabled with
+\fI\%\-novshift\fP\&.
+.sp
+When a vertical transformation is involved, typically a shift value read in a
+geoid grid will be applied. This may require such grid(s) to be installed, or
+PROJ networking capabilities to be enabled. Consult \fI\%PROJ\fP
+documentation for more details. In addition to a shift, the raster values may
+be multiplied by a factor to take into account vertical unit changes.
+In priority, the value returned by \fI\%GDALRasterBand::GetUnitType()\fP is
+used. The following values are currently recognized: \fBm\fP, \fBmetre\fP, \fBmetre\fP,
+\fBft\fP, \fBfoot\fP, \fBUS survey foot\fP\&. If there is no defined unit type at the
+band level, the vertical unit of the source CRS is used. The vertical unit of
+the target CRS is also used to determine that conversion factor. The conversion
+factor may be overridden by setting the \fBMULT_FACTOR_VERTICAL_SHIFT\fP warping
+option with \fI\%\-wo\fP\&. For example \fB\-wo MULT_FACTOR_VERTICAL_SHIFT=1\fP to
+disable any vertical unit change.
 .SH MEMORY USAGE
 .sp
 Adding RAM will almost certainly increase the speed of \fBgdalwarp\fP\&.
@@ -876,7 +976,8 @@ New in version 2.2.
 .sp
 .nf
 .ft C
-gdalwarp \-overwrite HDF4_SDS:ASTER_L1B:\(dqpg\-PR1B0000\-2002031402_100_001\(dq:2 pg\-PR1B0000\-2002031402_100_001_2.tif
+gdalwarp \-overwrite HDF4_SDS:ASTER_L1B:\(dqpg\-PR1B0000\-2002031402_100_001\(dq:2 \e
+    pg\-PR1B0000\-2002031402_100_001_2.tif
 .ft P
 .fi
 .UNINDENT
@@ -890,7 +991,8 @@ To apply a cutline on a un\-georeferenced image and clip from pixel (220,60) to 
 .sp
 .nf
 .ft C
-gdalwarp \-overwrite \-to SRC_METHOD=NO_GEOTRANSFORM \-to DST_METHOD=NO_GEOTRANSFORM \-te 220 60 1160 690 \-cutline cutline.csv in.png out.tif
+gdalwarp \-overwrite \-to SRC_METHOD=NO_GEOTRANSFORM \-to DST_METHOD=NO_GEOTRANSFORM \e
+    \-te 220 60 1160 690 \-cutline cutline.csv in.png out.tif
 .ft P
 .fi
 .UNINDENT
@@ -931,12 +1033,9 @@ gdalwarp \-overwrite in_dem.tif out_dem.tif \-s_srs EPSG:4326+5773 \-t_srs EPSG:
 .SH C API
 .sp
 This utility is also callable from C with \fI\%GDALWarp()\fP\&.
-.SH SEE ALSO
-.sp
-\fI\%Wiki page discussing options and behaviours of gdalwarp\fP
 .SH AUTHOR
 Frank Warmerdam <warmerdam@pobox.com>, Silke Reimer <silke@intevation.de>
 .SH COPYRIGHT
-1998-2024
+1998-2025
 .\" Generated by docutils manpage writer.
 .
